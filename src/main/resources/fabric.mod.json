@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "xp-rogue",
+	"version": "${version}",
+	"name": "XP Rogue",
+	"description": "轻量玩家属性成长：原版经验等级线性驱动属性。服务端专用，客户端无需安装。",
+	"authors": [
+		"hiromuraki"
+	],
+	"license": "MIT",
+	"icon": "assets/xp-rogue/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"server": [
+			"com.hiromuraki.xprogue.XPRogue"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
