@@ -3,24 +3,24 @@
 	"id": "xp-growth",
 	"version": "${version}",
 	"name": "XP Growth",
-	"description": "Attributes improve based on player experience. Server side only.",
+	"description": "Attributes improve based on player experience. Only server side required.",
 	"authors": [
 		"HiroMuraki"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "http://github.com/hiromuraki/xp-growth",
+		"sources": "http://github.com/hiromuraki/xp-growth"
 	},
 	"license": "MIT",
 	"icon": "assets/xp-growth/icon.png",
-	"environment": "server",
+	"environment": "*",
 	"entrypoints": {
-		"server": [
+		"main": [
 			"com.hiromuraki.xpgrowth.XPGrowth"
 		]
 	},
 	"depends": {
-		"fabricloader": ">=0.19.3",
+		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.2",
 		"java": ">=25",
 		"fabric-api": "*"

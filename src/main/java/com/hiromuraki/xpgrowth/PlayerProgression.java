@@ -8,6 +8,10 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public final class PlayerProgression {
     private PlayerProgression() {
@@ -48,11 +52,13 @@ public final class PlayerProgression {
                 continue;
             }
 
-            var amount = rule.perLevel() * level;
+            var amount = (rule.maxBonus() / config.getLevelCap()) * level;
             if (amount == 0.0) {
-                attr.removeModifier(rule.modifierId());
+                attr.removeModifier(rule.getModifierId());
             } else {
-                attr.addOrUpdateTransientModifier(rule.modifier(level));
+                var modifier = new AttributeModifier(rule.getModifierId(), amount,
+                        AttributeModifier.Operation.ADD_VALUE);
+                attr.addOrUpdateTransientModifier(modifier);
             }
         }
 
@@ -66,23 +72,37 @@ public final class PlayerProgression {
 
     private static void onLevelUp(ServerPlayer player, int level) {
         var config = XPGrowthConfig.get();
-        if (!config.getFeedback()) {
-            return;
-        }
-
         if (level > config.getLevelCap()) {
             return;
         }
 
-        if (level % config.getMilestoneInterval() == 0) {
-            player.sendOverlayMessage(Component.translatableWithFallback("xp_growth.level_up", "You feel stronger..."));
-            player.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, 1.0f);
-            player.level().sendParticles(
-                    ParticleTypes.HAPPY_VILLAGER,
-                    player.getX(), player.getY() + 1.0, player.getZ(),
-                    10,
-                    0.5, 0.5, 0.5,
-                    0);
+        if (level % config.getMilestoneStep() == 0) {
+            if (config.getMilestoneBonus()) {
+                var tier = level / config.getMilestoneStep();
+                var duration = Math.min(5 * tier, 30) * XPGrowth.TICK_PER_SECOND;
+                // Absorption hearts = (amplifier + 1) * 4
+                player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, Math.min(tier - 1, 4)));
+                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0));
+                player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, duration, 1));
+            }
+
+            if (config.getMilestoneFeedback()) {
+                player.sendOverlayMessage(
+                        Component.translatableWithFallback("xp_growth.level_up", "You feel stronger..."));
+                player.level().playSound(
+                        null,
+                        player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.PLAYER_LEVELUP,
+                        SoundSource.PLAYERS,
+                        1.0f, 1.0f);
+                player.level().sendParticles(
+                        ParticleTypes.HAPPY_VILLAGER,
+                        player.getX(), player.getY() + 1.0, player.getZ(),
+                        10,
+                        0.5, 0.5, 0.5,
+                        0);
+            }
         }
+
     }
 }
