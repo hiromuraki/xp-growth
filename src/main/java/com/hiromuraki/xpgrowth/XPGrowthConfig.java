@@ -1,4 +1,4 @@
-package com.hiromuraki.xprogue;
+package com.hiromuraki.xpgrowth;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,12 +12,12 @@ import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public final class XpRogueConfig {
-    private XpRogueConfig() {
+public final class XPGrowthConfig {
+    private XPGrowthConfig() {
         registerDefaults();
     }
 
-    public static XpRogueConfig get() {
+    public static XPGrowthConfig get() {
         return instance;
     }
 
@@ -39,16 +39,16 @@ public final class XpRogueConfig {
 
     public static void load() {
         var gson = new GsonBuilder().setPrettyPrinting().create();
-        var path = FabricLoader.getInstance().getConfigDir().resolve("xp-rogue.json");
-        var currentConfig = new XpRogueConfig();
+        var path = FabricLoader.getInstance().getConfigDir().resolve("xp-growth.json");
+        var currentConfig = new XPGrowthConfig();
 
         if (!Files.exists(path)) {
             try {
                 Files.createDirectories(path.getParent());
                 Files.writeString(path, gson.toJson(currentConfig.toJson()), StandardCharsets.UTF_8);
-                XPRogue.LOGGER.info("Generated default config at {}", path);
+                XPGrowth.LOGGER.info("Generated default config at {}", path);
             } catch (IOException e) {
-                XPRogue.LOGGER.warn("Failed to write default xp-rogue.json", e);
+                XPGrowth.LOGGER.warn("Failed to write default config file", e);
             }
         } else {
             try {
@@ -77,7 +77,7 @@ public final class XpRogueConfig {
                     }
                 }
             } catch (Exception e) {
-                XPRogue.LOGGER.warn("Failed to load xp-rogue.json, using defaults", e);
+                XPGrowth.LOGGER.warn("Failed to load config file, using defaults", e);
             }
         }
 
@@ -100,7 +100,7 @@ public final class XpRogueConfig {
         return root;
     }
 
-    private static XpRogueConfig instance = new XpRogueConfig();
+    private static XPGrowthConfig instance = new XPGrowthConfig();
     private int levelCap = 25;
     private int milestoneInterval = 5;
     private boolean feedback = true;

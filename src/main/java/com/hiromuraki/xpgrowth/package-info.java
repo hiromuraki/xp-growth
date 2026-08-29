@@ -1,2 +1,2 @@
 @org.jspecify.annotations.NullMarked
-package com.hiromuraki.xprogue;
+package com.hiromuraki.xpgrowth;

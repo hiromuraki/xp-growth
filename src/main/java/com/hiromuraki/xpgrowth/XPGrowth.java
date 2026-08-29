@@ -1,4 +1,4 @@
-package com.hiromuraki.xprogue;
+package com.hiromuraki.xpgrowth;
 
 import java.util.Objects;
 
@@ -9,16 +9,16 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class XPRogue implements DedicatedServerModInitializer {
+public class XPGrowth implements DedicatedServerModInitializer {
 
-	public static final String MOD_ID = "xp-rogue";
+	public static final String MOD_ID = "xp-growth";
 	public static final Logger LOGGER = Objects.requireNonNull(LoggerFactory.getLogger(MOD_ID));
 
 	@Override
 	public void onInitializeServer() {
-		XpRogueConfig.load();
-		LOGGER.info("XP Rogue loaded: {} attribute rules, level cap {}",
-				XpRogueConfig.get().getRules().size(), XpRogueConfig.get().getLevelCap());
+		XPGrowthConfig.load();
+		LOGGER.info("XP Growth loaded: {} attribute rules, level cap {}",
+				XPGrowthConfig.get().getRules().size(), XPGrowthConfig.get().getLevelCap());
 
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (var player : server.getPlayerList().getPlayers()) {

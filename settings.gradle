@@ -10,4 +10,4 @@ pluginManagement {
 }
 
 // Should match your modid
-rootProject.name = 'xp-rogue'
+rootProject.name = 'xp-growth'

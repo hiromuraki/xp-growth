@@ -1,4 +1,4 @@
-package com.hiromuraki.xprogue;
+package com.hiromuraki.xpgrowth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ public final class PlayerProgression {
     }
 
     private static void apply(ServerPlayer player) {
-        var config = XpRogueConfig.get();
+        var config = XPGrowthConfig.get();
         var level = Math.min(player.experienceLevel, config.getLevelCap());
 
         for (var rule : config.getRules().values()) {
@@ -65,7 +65,7 @@ public final class PlayerProgression {
     private static final Map<UUID, Integer> lastLevels = new HashMap<>();
 
     private static void onLevelUp(ServerPlayer player, int level) {
-        var config = XpRogueConfig.get();
+        var config = XPGrowthConfig.get();
         if (!config.getFeedback()) {
             return;
         }
@@ -75,7 +75,7 @@ public final class PlayerProgression {
         }
 
         if (level % config.getMilestoneInterval() == 0) {
-            player.sendOverlayMessage(Component.translatableWithFallback("xp_rogue.level_up", "You feel stronger..."));
+            player.sendOverlayMessage(Component.translatableWithFallback("xp_growth.level_up", "You feel stronger..."));
             player.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, 1.0f);
             player.level().sendParticles(
                     ParticleTypes.HAPPY_VILLAGER,

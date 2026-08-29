@@ -1,4 +1,4 @@
-package com.hiromuraki.xprogue;
+package com.hiromuraki.xpgrowth;
 
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -8,7 +8,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 public record AttributeRule(String key, Holder<Attribute> attribute, double perLevel, boolean enabled) {
 
     public Identifier modifierId() {
-        return Identifier.fromNamespaceAndPath(XPRogue.MOD_ID, key);
+        return Identifier.fromNamespaceAndPath(XPGrowth.MOD_ID, key);
     }
 
     public AttributeModifier modifier(double level) {

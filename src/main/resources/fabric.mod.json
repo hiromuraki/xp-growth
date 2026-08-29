@@ -1,18 +1,22 @@
 {
 	"schemaVersion": 1,
-	"id": "xp-rogue",
+	"id": "xp-growth",
 	"version": "${version}",
-	"name": "XP Rogue",
-	"description": "轻量玩家属性成长：原版经验等级线性驱动属性。服务端专用，客户端无需安装。",
+	"name": "XP Growth",
+	"description": "Attributes improve based on player experience. Server side only.",
 	"authors": [
-		"hiromuraki"
+		"HiroMuraki"
 	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
 	"license": "MIT",
-	"icon": "assets/xp-rogue/icon.png",
+	"icon": "assets/xp-growth/icon.png",
 	"environment": "server",
 	"entrypoints": {
 		"server": [
-			"com.hiromuraki.xprogue.XPRogue"
+			"com.hiromuraki.xpgrowth.XPGrowth"
 		]
 	},
 	"depends": {
