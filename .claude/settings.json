@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls s:/local/share/repos/minecraft-mods/xp-growth/CLAUDE.md ~/.claude/CLAUDE.md s:/local/share/repos/minecraft-mods/xp-growth/.claude 2>&1; echo \"---\"; ls s:/local/share/repos/minecraft-mods/xp-growth)",
+      "Read(//c/Users/11717/.claude/**)",
+      "Bash(node -e ' *)",
+      "Bash(git -C s:/local/share/repos/minecraft-mods/xp-growth log --oneline -8)",
+      "Bash(git diff *)",
+      "Read(//tmp/**)",
+      "Bash(ls s:/local/share/repos/minecraft-mods/xp-growth/src/test 2>/dev/null; ls s:/local/share/repos/minecraft-mods/xp-growth/src/main/java/com/hiromuraki/xpgrowth/; ls ~/.claude/CLAUDE.md 2>/dev/null && echo \"user CLAUDE.md exists\")",
+      "Bash(git -C /s/local/share/repos/minecraft-mods/xp-growth diff HEAD -- src/main/java)",
+      "Read(//s/local/share/repos/minecraft-mods/xxp-growth/src/main/java/com/hiromuraki/xpgrowth/**)",
+      "Read(//s/local/share/repos/**)",
+      "Read(//s/local/share/**)",
+      "Bash(awk 'NR==58' src/main/java/com/hiromuraki/xpgrowth/PlayerProgression.java)"
+    ]
+  }
+}

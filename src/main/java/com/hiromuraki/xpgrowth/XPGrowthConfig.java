@@ -3,7 +3,9 @@ package com.hiromuraki.xpgrowth;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.GsonBuilder;
@@ -37,8 +39,9 @@ public final class XPGrowthConfig {
         return milestoneBonus;
     }
 
-    public Map<String, AttributeRule> getRules() {
-        return rules;
+    @SuppressWarnings("null")
+    public Collection<AttributeRule> getRules() {
+        return rules.values();
     }
 
     public static void load() {
@@ -58,9 +61,6 @@ public final class XPGrowthConfig {
             try {
                 @SuppressWarnings("null")
                 var config = gson.fromJson(Files.readString(path, StandardCharsets.UTF_8), JsonObject.class);
-                if (config.has("levelCap")) {
-                    currentConfig.levelCap = Math.max(config.get("levelCap").getAsInt(), 1);
-                }
                 if (config.has("milestoneStep")) {
                     currentConfig.milestoneStep = Math.max(config.get("milestoneStep").getAsInt(), 1);
                 }
@@ -79,61 +79,122 @@ public final class XPGrowthConfig {
                         }
                         var o = attrs.getAsJsonObject(entry.getKey());
                         var rule = entry.getValue();
-                        var enabled = o.has("enabled") ? o.get("enabled").getAsBoolean() : rule.enabled();
-                        var maxBonus = o.has("maxBonus") ? o.get("maxBonus").getAsDouble() : rule.maxBonus();
-                        entry.setValue(new AttributeRule(rule.key(), rule.attribute(), maxBonus, enabled));
+                        var attr = new AttributeRule(
+                                rule.key(),
+                                rule.attribute(),
+                                o.has("startLevel") ? o.get("startLevel").getAsInt() : rule.startLevel(),
+                                o.has("maxLevel") ? o.get("maxLevel").getAsInt() : rule.maxLevel(),
+                                o.has("step") ? o.get("step").getAsInt() : rule.step(),
+                                o.has("stepBonus") ? o.get("stepBonus").getAsDouble() : rule.stepBonus(),
+                                o.has("enabled") ? o.get("enabled").getAsBoolean() : rule.enabled());
+                        entry.setValue(attr);
                     }
                 }
+
+                currentConfig.syncLevelCap();
+                instance = currentConfig;
+
             } catch (Exception e) {
                 XPGrowth.LOGGER.warn("Failed to load config file, using defaults", e);
             }
         }
-
-        instance = currentConfig;
     }
 
     public JsonObject toJson() {
         var root = new JsonObject();
-        root.addProperty("levelCap", levelCap);
         root.addProperty("milestoneStep", milestoneStep);
         root.addProperty("milestoneFeedback", milestoneFeedback);
         root.addProperty("milestoneBonus", milestoneBonus);
 
         var attrs = new JsonObject();
-        for (AttributeRule rule : rules.values()) {
-            JsonObject o = new JsonObject();
-            o.addProperty("enabled", rule.enabled());
-            o.addProperty("maxBonus", rule.maxBonus());
-            attrs.add(rule.key(), o);
-        }
+        rules.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> {
+                    JsonObject o = new JsonObject();
+                    o.addProperty("enabled", e.getValue().enabled());
+                    o.addProperty("startLevel", e.getValue().startLevel());
+                    o.addProperty("maxLevel", e.getValue().maxLevel());
+                    o.addProperty("step", e.getValue().step());
+                    o.addProperty("stepBonus", e.getValue().stepBonus());
+                    attrs.add(e.getKey(), o);
+                });
         root.add("attributes", attrs);
         return root;
     }
 
     private static XPGrowthConfig instance = new XPGrowthConfig();
-    private int levelCap = 30;
+    private int levelCap = 0;
     private int milestoneStep = 5;
     private boolean milestoneFeedback = true;
     private boolean milestoneBonus = true;
     private final Map<String, AttributeRule> rules = new LinkedHashMap<>();
 
     private void registerDefaults() {
+        var maxLevel = 30;
+        var attrSheet = List.of(
+                // 血量：每 2 级增加 2 点血，30 级满
+                new AttributeRule("max_health", Attributes.MAX_HEALTH,
+                        10, maxLevel, 2, 2, true),
+                // 潜水时间：每级提升
+                new AttributeRule("oxygen_bonus", Attributes.OXYGEN_BONUS,
+                        0, maxLevel, 1, 1.0 / maxLevel, true),
+                // 击退抗性：每级提升
+                new AttributeRule("knockback_resistance", Attributes.KNOCKBACK_RESISTANCE,
+                        0, maxLevel, 1, 0.6 / maxLevel, true),
+                // 爆炸击退抗性：每级提升
+                new AttributeRule("explosion_knockback_resistance", Attributes.EXPLOSION_KNOCKBACK_RESISTANCE,
+                        0, maxLevel, 1, 0.3 / maxLevel, true),
+                // 掉落最大高度：15 级 + 0.5，30 级 + 1.0
+                new AttributeRule("safe_fall_distance", Attributes.SAFE_FALL_DISTANCE,
+                        0, maxLevel, 15, 0.5, true),
+                // 掉落伤害：每级提升
+                new AttributeRule("fall_damage_multiplier", Attributes.FALL_DAMAGE_MULTIPLIER,
+                        0, maxLevel, 1, -0.2 / maxLevel, true),
+                // 移速：每级提升
+                new AttributeRule("movement_speed", Attributes.MOVEMENT_SPEED,
+                        0, maxLevel, 1, 0.02 / maxLevel, true),
+                // 水下移速：每级提升
+                new AttributeRule("water_movement_efficiency", Attributes.WATER_MOVEMENT_EFFICIENCY,
+                        0, maxLevel, 1, 0.2 / maxLevel, true),
+                // 幸运值：每级提升
+                new AttributeRule("luck", Attributes.LUCK,
+                        0, maxLevel, 1, 1.0 / maxLevel, true),
+                // 攻击伤害：每 5 级提升 0.5
+                new AttributeRule("attack_damage", Attributes.ATTACK_DAMAGE,
+                        0, maxLevel, 5, 0.5, true),
+                // 攻击速度：每级提升
+                new AttributeRule("attack_speed", Attributes.ATTACK_SPEED,
+                        0, maxLevel, 1, 1.0 / maxLevel, true),
+                // 破坏方块速度：每级提升
+                new AttributeRule("block_break_speed", Attributes.BLOCK_BREAK_SPEED,
+                        0, maxLevel, 1, 0.5 / maxLevel, true),
+                // 水下挖掘时间：每级提升
+                new AttributeRule("submerged_mining_speed", Attributes.SUBMERGED_MINING_SPEED,
+                        0, maxLevel, 1, 0.5 / maxLevel, true),
+                // 护甲：从 10 级开始，每 5 级给予 1 点，最大 4 点
+                new AttributeRule("armor", Attributes.ARMOR,
+                        10, maxLevel, 5, 1, true),
+                // 护甲韧性：从 10 级开始，每 5 级给予 0.5 点，最大 2 点
+                new AttributeRule("armor_toughness", Attributes.ARMOR_TOUGHNESS,
+                        10, maxLevel, 5, 0.5, true),
+                // 着火时间：每级提升
+                new AttributeRule("burning_time", Attributes.BURNING_TIME,
+                        0, maxLevel, 1, -1.0 / maxLevel, true));
+
         rules.clear();
-        rules.put("max_health", new AttributeRule("max_health", Attributes.MAX_HEALTH, 20, true));
-        rules.put("movement_speed", new AttributeRule("movement_speed", Attributes.MOVEMENT_SPEED, 0.02, true));
-        rules.put("water_movement_efficiency",
-                new AttributeRule("water_movement_efficiency", Attributes.WATER_MOVEMENT_EFFICIENCY, 0.2, true));
-        rules.put("knockback_resistance",
-                new AttributeRule("knockback_resistance", Attributes.KNOCKBACK_RESISTANCE, 0.8, true));
-        rules.put("block_break_speed",
-                new AttributeRule("block_break_speed", Attributes.BLOCK_BREAK_SPEED, 0.5, true));
-        rules.put("safe_fall_distance",
-                new AttributeRule("safe_fall_distance", Attributes.SAFE_FALL_DISTANCE, 2, true));
-        rules.put("attack_damage", new AttributeRule("attack_damage", Attributes.ATTACK_DAMAGE, 2, true));
-        rules.put("luck", new AttributeRule("luck", Attributes.LUCK, 1, true));
-        rules.put("attack_speed", new AttributeRule("attack_speed", Attributes.ATTACK_SPEED, 1, true));
-        rules.put("armor", new AttributeRule("armor", Attributes.ARMOR, 4, true));
-        rules.put("armor_toughness", new AttributeRule("armor_toughness", Attributes.ARMOR_TOUGHNESS, 2, true));
-        rules.put("burning_time", new AttributeRule("burning_time", Attributes.BURNING_TIME, -1, true));
+        for (var attr : attrSheet) {
+            rules.put(attr.key(), attr);
+        }
+
+        syncLevelCap();
+    }
+
+    private void syncLevelCap() {
+        for (var rule : rules.values()) {
+            if (rule.maxLevel() > levelCap) {
+                levelCap = rule.maxLevel();
+            }
+        }
     }
 }

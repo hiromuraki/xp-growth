@@ -29,20 +29,21 @@ public final class PlayerProgression {
     public static void tick(ServerPlayer player) {
         var currentLevel = player.experienceLevel;
         var previousLevel = lastLevels.get(player.getUUID());
-        if (previousLevel == null || previousLevel != currentLevel) {
-            lastLevels.put(player.getUUID(), currentLevel);
-            apply(player);
-            if (previousLevel != null && currentLevel > previousLevel) {
-                onLevelUp(player, currentLevel);
-            }
+        if (previousLevel != null && previousLevel == currentLevel) {
+            return;
+        }
+
+        lastLevels.put(player.getUUID(), currentLevel);
+        apply(player);
+        if (previousLevel != null && currentLevel > previousLevel) {
+            onLevelUp(player, previousLevel, currentLevel);
         }
     }
 
     private static void apply(ServerPlayer player) {
         var config = XPGrowthConfig.get();
-        var level = Math.min(player.experienceLevel, config.getLevelCap());
 
-        for (var rule : config.getRules().values()) {
+        for (var rule : config.getRules()) {
             if (!rule.enabled()) {
                 continue;
             }
@@ -52,7 +53,9 @@ public final class PlayerProgression {
                 continue;
             }
 
-            var amount = (rule.maxBonus() / config.getLevelCap()) * level;
+            var level = Math.min(player.experienceLevel, rule.maxLevel());
+
+            var amount = Math.max((level - rule.startLevel()), 0) / rule.step() * rule.stepBonus();
             if (amount == 0.0) {
                 attr.removeModifier(rule.getModifierId());
             } else {
@@ -70,39 +73,40 @@ public final class PlayerProgression {
 
     private static final Map<UUID, Integer> lastLevels = new HashMap<>();
 
-    private static void onLevelUp(ServerPlayer player, int level) {
+    private static void onLevelUp(ServerPlayer player, int previousLevel, int newLevel) {
         var config = XPGrowthConfig.get();
-        if (level > config.getLevelCap()) {
+        if (previousLevel >= config.getLevelCap()) {
             return;
         }
 
-        if (level % config.getMilestoneStep() == 0) {
-            if (config.getMilestoneBonus()) {
-                var tier = level / config.getMilestoneStep();
-                var duration = Math.min(5 * tier, 30) * XPGrowth.TICK_PER_SECOND;
-                // Absorption hearts = (amplifier + 1) * 4
-                player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, Math.min(tier - 1, 4)));
-                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0));
-                player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, duration, 1));
-            }
-
-            if (config.getMilestoneFeedback()) {
-                player.sendOverlayMessage(
-                        Component.translatableWithFallback("xp_growth.level_up", "You feel stronger..."));
-                player.level().playSound(
-                        null,
-                        player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.PLAYER_LEVELUP,
-                        SoundSource.PLAYERS,
-                        1.0f, 1.0f);
-                player.level().sendParticles(
-                        ParticleTypes.HAPPY_VILLAGER,
-                        player.getX(), player.getY() + 1.0, player.getZ(),
-                        10,
-                        0.5, 0.5, 0.5,
-                        0);
-            }
+        if (newLevel < (previousLevel / config.getMilestoneStep() + 1) * config.getMilestoneStep()) {
+            return;
         }
 
+        if (config.getMilestoneBonus()) {
+            var tier = Math.min(newLevel, config.getLevelCap()) / config.getMilestoneStep();
+            var duration = Math.min(5 * tier, 30) * XPGrowth.TICK_PER_SECOND;
+            // Absorption HP = (amplifier + 1) * 4
+            player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, Math.min(tier - 1, 4)));
+            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0));
+            player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, duration, 1));
+        }
+
+        if (config.getMilestoneFeedback()) {
+            player.sendOverlayMessage(
+                    Component.translatableWithFallback("xp_growth.level_up", "You feel stronger..."));
+            player.level().playSound(
+                    null,
+                    player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.PLAYER_LEVELUP,
+                    SoundSource.PLAYERS,
+                    1.0f, 1.0f);
+            player.level().sendParticles(
+                    ParticleTypes.HAPPY_VILLAGER,
+                    player.getX(), player.getY() + 1.0, player.getZ(),
+                    10,
+                    0.5, 0.5, 0.5,
+                    0);
+        }
     }
 }
