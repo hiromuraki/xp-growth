@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public class XPGrowth implements ModInitializer {
 
         XPGrowthConfig.load();
         LOGGER.info("XP Growth loaded: {} attribute rules, level cap {}",
-                XPGrowthConfig.get().getRules().size(), XPGrowthConfig.get().getLevelCap());
+                XPGrowthConfig.getRules().size(), XPGrowthConfig.getLevelCap());
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (var player : server.getPlayerList().getPlayers()) {

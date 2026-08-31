@@ -10,7 +10,7 @@ public record AttributeRule(
         int startLevel,
         int maxLevel,
         int step,
-        double stepBonus,
+        Double stepBonus,
         boolean enabled) {
 
     public AttributeRule {

@@ -46,9 +46,7 @@ public final class PlayerProgression {
     }
 
     private static void apply(ServerPlayer player) {
-        var config = XPGrowthConfig.get();
-
-        for (var rule : config.getRules()) {
+        for (var rule : XPGrowthConfig.getRules()) {
             if (!rule.enabled()) {
                 continue;
             }
@@ -79,17 +77,16 @@ public final class PlayerProgression {
     private static final Map<UUID, Integer> lastLevels = new HashMap<>();
 
     private static void onLevelUp(ServerPlayer player, int previousLevel, int newLevel) {
-        var config = XPGrowthConfig.get();
-        if (previousLevel >= config.getLevelCap()) {
+        if (previousLevel >= XPGrowthConfig.getLevelCap()) {
             return;
         }
 
-        if (newLevel < (previousLevel / config.getMilestoneStep() + 1) * config.getMilestoneStep()) {
+        if (newLevel < (previousLevel / XPGrowthConfig.getMilestoneStep() + 1) * XPGrowthConfig.getMilestoneStep()) {
             return;
         }
 
-        if (config.getMilestoneBonus()) {
-            var tier = Math.min(newLevel, config.getLevelCap()) / config.getMilestoneStep();
+        if (XPGrowthConfig.getMilestoneBonus()) {
+            var tier = Math.min(newLevel, XPGrowthConfig.getLevelCap()) / XPGrowthConfig.getMilestoneStep();
             var duration = Math.min(5 * tier, 30) * XPGrowth.TICK_PER_SECOND;
             // Absorption HP = (amplifier + 1) * 4
             player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, duration, Math.min(tier - 1, 4)));
@@ -97,7 +94,7 @@ public final class PlayerProgression {
             player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, duration, 1));
         }
 
-        if (config.getMilestoneFeedback()) {
+        if (XPGrowthConfig.getMilestoneFeedback()) {
             player.sendOverlayMessage(
                     Component.translatableWithFallback("xp_growth.level_up", "You feel stronger..."));
             player.level().playSound(
