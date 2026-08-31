@@ -3,9 +3,11 @@ package com.hiromuraki.xpgrowth;
 import java.util.Objects;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,8 @@ public class XPGrowth implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        XPGrowthAttachments.register();
+
         XPGrowthConfig.load();
         LOGGER.info("XP Growth loaded: {} attribute rules, level cap {}",
                 XPGrowthConfig.get().getRules().size(), XPGrowthConfig.get().getLevelCap());
@@ -35,5 +39,15 @@ public class XPGrowth implements ModInitializer {
 
         ServerPlayConnectionEvents.DISCONNECT
                 .register((handler, server) -> PlayerProgression.onLeave(handler.getPlayer()));
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            server.getPlayerList().getPlayers().stream().forEach(p -> {
+                if (p == null) {
+                    return;
+                }
+
+                PlayerProgression.onLeave(p);
+            });
+        });
     }
 }

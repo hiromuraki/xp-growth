@@ -18,12 +18,17 @@ public final class PlayerProgression {
     }
 
     public static void onJoin(ServerPlayer player) {
+        var savedHealth = player.getAttachedOrElse(XPGrowthAttachments.SAVED_HEALTH, -1f);
         lastLevels.put(player.getUUID(), player.experienceLevel);
         apply(player);
+        if (savedHealth > 0f) {
+            player.setHealth(Math.min(savedHealth, player.getMaxHealth()));
+        }
     }
 
     public static void onLeave(ServerPlayer player) {
         lastLevels.remove(player.getUUID());
+        player.setAttached(XPGrowthAttachments.SAVED_HEALTH, player.getHealth());
     }
 
     public static void tick(ServerPlayer player) {
