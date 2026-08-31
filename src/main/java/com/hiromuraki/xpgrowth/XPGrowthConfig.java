@@ -115,38 +115,54 @@ public final class XPGrowthConfig {
         var milestoneBonus = true;
         var maxLevel = 30;
         var rules = List.of(
-                // 血量：每 2 级增加 2 点血，30 级满
+                // 血量：从 10 级开始生效，每 2 级增加 2 点血
+                // base:20 + add:20 => final:40
                 new AttributeRuleDto("max_health", 10, maxLevel, 2, 2.0, true),
-                // 潜水时间：每级提升，最大期望潜水时间为 30 秒
+                // 潜水时间：每级提升
+                // base:1 + add:1 => final:2
                 new AttributeRuleDto("oxygen_bonus", 0, maxLevel, 1, 1.0 / maxLevel, true),
-                // 击退抗性：每级提升，最大 +60% 击退抗性
+                // 击退抗性：每级提升
+                // base:0 + base:60% => final:60%
                 new AttributeRuleDto("knockback_resistance", 0, maxLevel, 1, 0.6 / maxLevel, true),
-                // 爆炸击退抗性：每级提升，最大 +30% 击退抗性
+                // 爆炸击退抗性：每级提升
+                // base:0 + add:30% => final:30% 
                 new AttributeRuleDto("explosion_knockback_resistance", 0, maxLevel, 1, 0.3 / maxLevel, true),
                 // 掉落最大高度：15 级 + 0.5，30 级 + 1.0
+                // base:3 + add:1 => final:4
                 new AttributeRuleDto("safe_fall_distance", 0, maxLevel, 15, 0.5, true),
-                // 掉落伤害：每级提升，最大 -20% 掉落伤害
+                // 掉落伤害：每级提升
+                // base:100% + add:-20% => final:80%
                 new AttributeRuleDto("fall_damage_multiplier", 0, maxLevel, 1, -0.2 / maxLevel, true),
-                // 移速：每级提升，最大 +20% 移速
+                // 移速：每级提升
+                // base:0.1 + add:0.02 => final:0.12
                 new AttributeRuleDto("movement_speed", 0, maxLevel, 1, 0.02 / maxLevel, true),
-                // 水下移速：每级提升，最大 +20% 移速
+                // 水下移速效率：每级提升
+                // base:0% + add:20% => final:20%
                 new AttributeRuleDto("water_movement_efficiency", 0, maxLevel, 1, 0.2 / maxLevel, true),
-                // 幸运值：每级提升，最大提供 1 点
+                // 幸运值：每级提升
+                // base:0 + add:1 => final:1
                 new AttributeRuleDto("luck", 0, maxLevel, 1, 1.0 / maxLevel, true),
                 // 攻击伤害：每 5 级提升 0.5，最大 3 点
+                // base:1 + add:3 => final:4
                 new AttributeRuleDto("attack_damage", 0, maxLevel, 5, 0.5, true),
                 // 攻击速度：每级提升，最大提高 1 点
+                // base:4 + add:1 => final:5
                 new AttributeRuleDto("attack_speed", 0, maxLevel, 1, 1.0 / maxLevel, true),
-                // 破坏方块速度：每级提升，最大提高 50% 破坏速度
+                // 破坏方块速度：每级提升
+                // base:100% + add:50% => final:150%
                 new AttributeRuleDto("block_break_speed", 0, maxLevel, 1, 0.5 / maxLevel, true),
-                // 水下挖掘时间：每级提升，最大提高 25% 挖掘速度
+                // 水下挖掘时间：每级提升
+                // base:20% + add:25% => final:45%
                 new AttributeRuleDto("submerged_mining_speed", 0, maxLevel, 1, 0.25 / maxLevel, true),
                 // 护甲：从 10 级开始，每 5 级给予 1 点，最大 4 点
+                // base:0 + add:4 => final:4
                 new AttributeRuleDto("armor", 10, maxLevel, 5, 1.0, true),
                 // 护甲韧性：从 10 级开始，每 5 级给予 0.5 点，最大 2 点
+                // base:0 + add:2 => final:2
                 new AttributeRuleDto("armor_toughness", 10, maxLevel, 5, 0.5, true),
-                // 着火时间：每级提升，最大降低 1 秒着火时间
-                new AttributeRuleDto("burning_time", 0, maxLevel, 1, -1.0 / maxLevel, true));
+                // 着火时间：每级提升
+                // base:100% - add:50% => final:50%
+                new AttributeRuleDto("burning_time", 0, maxLevel, 1, -0.5 / maxLevel, true));
 
         return new ConfigDto(milestoneStep, milestoneFeedback, milestoneBonus, rules);
     }
